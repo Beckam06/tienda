@@ -6,6 +6,11 @@ page_require_level(2);
 $quotation_id = (int)$_GET['id'];
 $quotation = find_by_id('quotations', $quotation_id);
 $items = find_items_by_quotation($quotation_id);
+
+if (!$quotation) {
+    $session->msg("d", "ID de cotización no válido.");
+    redirect('list_quotations.php');
+}
 ?>
 <?php include_once('layouts/header.php'); ?>
 
@@ -24,15 +29,13 @@ $items = find_items_by_quotation($quotation_id);
 
                 <!-- Contenido de la cotización -->
                 <div id="quotation-print" style="width: 100%; max-width: 100%; margin: 0 auto;">
-                    <!-- Logo de la empresa -->
+                    <!-- Encabezado de la empresa -->
                     <div class="text-center">
-                        <img src="uploads/logo_empresa.png" alt="Logo de la empresa" style="max-width: 400px; height: auto; margin-bottom: 5px;">
+                        <img src="uploads/logo_empresa.png" alt="Logo de la empresa" style="max-width: 100px; height: auto; margin-bottom: 5px;">
+                        <h2>A.MW Motorepuesto</h2>
+                        <p>Dirección: B°Los graneros esquina Sureste del mercadito verde, esquina opuesta a carwash Cali</p>
+                        <p>Teléfono: 9303-7467 | 9353-3842</p>
                     </div>
-
-                    <!-- Información de la empresa -->
-                    <h2 class="text-center">A.MW Motorepuesto</h2>
-                    <p class="text-center">Dirección: B°Los graneros esquina Sureste del mercadito verde, esquina opuesta a carwash Cali</p>
-                    <p class="text-center">Teléfono: 9303-7467 | 9353-3842</p>
 
                     <!-- Información de la cotización -->
                     <h3 class="text-center">Cotización </h3>
@@ -140,7 +143,7 @@ $items = find_items_by_quotation($quotation_id);
     }
 
     .text-center img {
-        max-width: 100%;
+        max-width: 100px; /* Reduced max-width */
         height: auto;
         margin-bottom: 10px;
     }

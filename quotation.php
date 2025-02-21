@@ -3,8 +3,35 @@ $page_title = 'Crear Cotización';
 require_once('includes/load.php');
 page_require_level(2);
 
-// Obtener todos los productos
-$products = join_product_table();
+// Búsqueda
+$search = isset($_POST['search']) ? remove_junk($db->escape($_POST['search'])) : (isset($_GET['search']) ? remove_junk($db->escape($_GET['search'])) : '');
+
+// Paginación
+$registros_por_pagina = 5; // Número de registros por página
+$pagina_actual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1; // Página actual
+$offset = ($pagina_actual - 1) * $registros_por_pagina;
+
+// Consulta base para productos
+$sql = "SELECT p.*, c.name AS categorie, m.file_name AS image 
+        FROM products p 
+        LEFT JOIN categories c ON c.id = p.categorie_id 
+        LEFT JOIN media m ON m.id = p.media_id";
+
+// Aplicar búsqueda si existe
+if ($search) {
+    $sql .= " WHERE p.name LIKE '%{$search}%'";
+}
+
+// Consulta para contar el total de registros
+$sql_total = str_replace("SELECT p.*, c.name AS categorie, m.file_name AS image", "SELECT COUNT(*) AS total", $sql);
+$resultado_total = $db->query($sql_total);
+$fila_total = $db->fetch_assoc($resultado_total);
+$total_registros = $fila_total['total'];
+$total_paginas = ceil($total_registros / $registros_por_pagina);
+
+// Consulta paginada
+$sql .= " LIMIT {$registros_por_pagina} OFFSET {$offset}";
+$products = find_by_sql($sql);
 ?>
 <?php include_once('layouts/header.php'); ?>
 
@@ -24,6 +51,12 @@ $products = join_product_table();
                 </strong>
             </div>
             <div class="panel-body">
+                <form method="post" action="quotation.php" class="form-inline">
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="search" placeholder="Buscar producto" value="<?php echo $search; ?>">
+                    </div>
+                    <button type="submit" class="btn btn-default">Buscar</button>
+                </form>
                 <form method="post" action="add_to_quotation.php">
                     <table class="table table-bordered">
                         <thead>
@@ -52,6 +85,19 @@ $products = join_product_table();
                         </tbody>
                     </table>
                 </form>
+                <div class="paginacion">
+                    <?php if ($pagina_actual > 1): ?>
+                        <a href="?pagina=<?php echo $pagina_actual - 1; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>" class="btn btn-primary">Anterior</a>
+                    <?php endif; ?>
+
+                    <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
+                        <a href="?pagina=<?php echo $i; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>" class="btn btn-default <?php echo ($i == $pagina_actual) ? 'active' : ''; ?>"><?php echo $i; ?></a>
+                    <?php endfor; ?>
+
+                    <?php if ($pagina_actual < $total_paginas): ?>
+                        <a href="?pagina=<?php echo $pagina_actual + 1; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>" class="btn btn-primary">Siguiente</a>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
     </div>

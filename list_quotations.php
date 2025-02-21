@@ -3,8 +3,19 @@ $page_title = 'Lista de Cotizaciones';
 require_once('includes/load.php');
 page_require_level(2);
 
+// Búsqueda
+$search = isset($_POST['search']) ? remove_junk($db->escape($_POST['search'])) : (isset($_GET['search']) ? remove_junk($db->escape($_GET['search'])) : '');
+
+// Consulta base para cotizaciones
+$sql = "SELECT * FROM quotations";
+
+// Aplicar búsqueda si existe
+if ($search) {
+    $sql .= " WHERE client_name LIKE '%{$search}%'";
+}
+
 // Obtener todas las cotizaciones
-$quotations = find_all('quotations');
+$quotations = find_by_sql($sql);
 ?>
 <?php include_once('layouts/header.php'); ?>
 
@@ -24,6 +35,12 @@ $quotations = find_all('quotations');
                 </strong>
             </div>
             <div class="panel-body">
+                <form method="post" action="list_quotations.php" class="form-inline">
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="search" placeholder="Buscar por nombre" value="<?php echo $search; ?>">
+                    </div>
+                    <button type="submit" class="btn btn-default">Buscar</button>
+                </form>
                 <table class="table table-bordered">
                     <thead>
                         <tr>
@@ -45,6 +62,8 @@ $quotations = find_all('quotations');
                             <td><?php echo remove_junk($quotation['total']); ?></td>
                             <td>
                                 <a href="view_quotation.php?id=<?php echo $quotation['id']; ?>" class="btn btn-info btn-xs">Ver</a>
+                                <a href="edit_quotation.php?id=<?php echo $quotation['id']; ?>" class="btn btn-warning btn-xs">Editar</a>
+                                <a href="delete_quotation.php?id=<?php echo $quotation['id']; ?>" class="btn btn-danger btn-xs" onclick="return confirm('¿Estás seguro de que deseas eliminar esta cotización?');">Eliminar</a>
                             </td>
                         </tr>
                         <?php endforeach; ?>
