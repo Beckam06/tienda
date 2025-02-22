@@ -8,7 +8,7 @@ $search = isset($_POST['search']) ? remove_junk($db->escape($_POST['search'])) :
 $highlight = isset($_GET['highlight']) ? (int)$_GET['highlight'] : '';
 
 // Paginación
-$registros_por_pagina = 5; // Número de registros por página
+$registros_por_pagina = 20; // Número de registros por página
 $pagina_actual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1; // Página actual
 $offset = ($pagina_actual - 1) * $registros_por_pagina;
 
@@ -34,21 +34,22 @@ $total_paginas = ceil($total_registros / $registros_por_pagina);
 $sql .= " LIMIT {$registros_por_pagina} OFFSET {$offset}";
 $all_products = find_by_sql($sql);
 
-// Alerta de bajo stock
-$low_stock_alert = false;
-$low_stock_products = [];
-foreach ($all_products as $product) {
-    if ($product['quantity'] <= 5) {
-        $low_stock_alert = true;
-        $low_stock_products[] = $product;
-    }
-}
+// Consulta para contar todos los productos con bajo stock
+$sql_low_stock = "SELECT COUNT(*) AS total_low_stock FROM products WHERE quantity <= 5";
+$resultado_low_stock = $db->query($sql_low_stock);
+$fila_low_stock = $db->fetch_assoc($resultado_low_stock);
+$total_low_stock = $fila_low_stock['total_low_stock'];
 ?>
 
 <?php include_once('layouts/header.php'); ?>
 <div class="row">
     <div class="col-md-12">
         <?php echo display_msg($msg); ?>
+        <?php if ($total_low_stock > 0): ?>
+            <div class="alert alert-warning">
+                <strong>¡Atención!</strong> Hay <?php echo $total_low_stock; ?> productos con bajo stock.
+            </div>
+        <?php endif; ?>
     </div>
     <div class="col-md-12">
         <div class="panel panel-default">
@@ -64,16 +65,6 @@ foreach ($all_products as $product) {
                 </form>
             </div>
             <div class="panel-body">
-                <?php if ($low_stock_alert): ?>
-                    <div class="alert alert-warning">
-                        <strong>¡Atención!</strong> Los siguientes productos tienen un stock bajo:
-                        <ul>
-                            <?php foreach ($low_stock_products as $low_stock_product): ?>
-                                <li><?php echo remove_junk($low_stock_product['name']); ?> - Stock: <?php echo remove_junk($low_stock_product['quantity']); ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                <?php endif; ?>
                 <table class="table table-bordered">
                     <thead>
                         <tr>
@@ -91,8 +82,8 @@ foreach ($all_products as $product) {
                     </thead>
                     <tbody>
                         <?php foreach ($all_products as $product): ?>
-                            <tr class="<?php echo ($product['quantity'] <= 5) ? 'low-stock' : ''; ?>">
-                                <td class="text-center"><?php echo count_id(); ?></td>
+                            <tr id="product-<?php echo $product['id']; ?>" class="<?php echo ($product['quantity'] <= 5) ? 'low-stock' : ''; ?>">
+                                <td class="text-center"><?php echo $offset + count_id(); ?></td>
                                 <td><?php echo remove_junk($product['codigo']); ?></td>
                                 <td><?php echo remove_junk($product['name']); ?></td>
                                 <td class="text-center"><?php echo remove_junk($product['categorie']); ?></td>
@@ -112,7 +103,7 @@ foreach ($all_products as $product) {
                                         <a href="edit_product.php?id=<?php echo (int)$product['id']; ?>" class="btn btn-info btn-xs" title="Editar" data-toggle="tooltip">
                                             <span class="glyphicon glyphicon-edit"></span>
                                         </a>
-                                        <a href="delete_product.php?id=<?php echo (int)$product['id']; ?>" class="btn btn-danger btn-xs" title="Eliminar" data-toggle="tooltip">
+                                        <a href="delete_product.php?id=<?php echo (int)$product['id']; ?>" class="btn btn-danger btn-xs" title="Eliminar" data-toggle="tooltip" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?');">
                                             <span class="glyphicon glyphicon-trash"></span>
                                         </a>
                                     </div>
@@ -139,3 +130,30 @@ foreach ($all_products as $product) {
     </div>
 </div>
 <?php include_once('layouts/footer.php'); ?>
+
+<style>
+    .low-stock {
+        background-color: #ffcccc; /* Fondo rojo para productos con bajo stock */
+        font-weight: bold; /* Texto en negrita */
+    }
+    .highlight {
+        background-color: #d4edda; /* Fondo verde claro */
+        transition: background-color 3s ease-out;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var highlightId = "<?php echo $highlight; ?>";
+        if (highlightId) {
+            var element = document.getElementById('product-' + highlightId);
+            if (element) {
+                element.classList.add('highlight');
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(function() {
+                    element.classList.remove('highlight');
+                }, 3000);
+            }
+        }
+    });
+</script>

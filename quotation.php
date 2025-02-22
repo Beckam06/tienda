@@ -7,7 +7,7 @@ page_require_level(2);
 $search = isset($_POST['search']) ? remove_junk($db->escape($_POST['search'])) : (isset($_GET['search']) ? remove_junk($db->escape($_GET['search'])) : '');
 
 // Paginación
-$registros_por_pagina = 5; // Número de registros por página
+$registros_por_pagina = 20; // Número de registros por página
 $pagina_actual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1; // Página actual
 $offset = ($pagina_actual - 1) * $registros_por_pagina;
 
@@ -61,7 +61,7 @@ $products = find_by_sql($sql);
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                
                                 <th>Producto</th>
                                 <th>Precio</th>
                                 <th>Cantidad</th>
@@ -71,7 +71,7 @@ $products = find_by_sql($sql);
                         <tbody>
                             <?php foreach ($products as $product): ?>
                             <tr>
-                                <td><?php echo count_id(); ?></td>
+                               
                                 <td><?php echo remove_junk($product['name']); ?></td>
                                 <td><?php echo remove_junk($product['sale_price']); ?></td>
                                 <td>

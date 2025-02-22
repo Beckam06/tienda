@@ -66,7 +66,7 @@ if (isset($_POST['edit_product'])) {
 
         if ($db->query($query)) {
             $session->msg('s', "Producto actualizado exitosamente.");
-            redirect('edit_product.php?id=' . $product_id, false);
+            redirect('product.php?highlight=' . $product_id, false);
         } else {
             $session->msg('d', 'Lo siento, la actualización falló.');
             redirect('edit_product.php?id=' . $product_id, false);
@@ -76,7 +76,6 @@ if (isset($_POST['edit_product'])) {
         redirect('edit_product.php?id=' . $product_id, false);
     }
 }
-
 
 $product = find_by_id('products', (int)$_GET['id']);
 ?>
@@ -181,8 +180,6 @@ $product = find_by_id('products', (int)$_GET['id']);
 <?php include_once('layouts/footer.php'); ?>
 
 <style>
-
-
 .form-group label {
     font-weight: bold;
     margin-bottom: 5px;
@@ -198,5 +195,4 @@ $product = find_by_id('products', (int)$_GET['id']);
     padding: 5px;
     background-color: #fff;
 }
-
 </style>

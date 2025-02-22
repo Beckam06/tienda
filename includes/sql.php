@@ -24,17 +24,18 @@ function find_by_sql($sql)
 /*--------------------------------------------------------------*/
 /*  Function for Find data from table by id
 /*--------------------------------------------------------------*/
-function find_by_id($table,$id)
-{
+function find_by_id($table, $id) {
   global $db;
   $id = (int)$id;
-    if(tableExists($table)){
-          $sql = $db->query("SELECT * FROM {$db->escape($table)} WHERE id='{$db->escape($id)}' LIMIT 1");
-          if($result = $db->fetch_assoc($sql))
-            return $result;
-          else
-            return null;
-     }
+  if (tableExists($table)) {
+      $sql = $db->query("SELECT * FROM {$db->escape($table)} WHERE id='{$db->escape($id)}' LIMIT 1");
+      if ($result = $db->fetch_assoc($sql)) {
+          return $result; // Devuelve un array si encuentra el registro
+      } else {
+          return false; // Devuelve false si no encuentra el registro
+      }
+  }
+  return false; // Devuelve false si la tabla no existe
 }
 /*--------------------------------------------------------------*/
 /* Function for Delete data from table by id
@@ -369,7 +370,8 @@ function find_items_by_quotation($quotation_id) {
           FROM quotation_items qi
           LEFT JOIN products p ON p.id = qi.product_id
           WHERE qi.quotation_id = '{$quotation_id}'";
-  return find_by_sql($sql);
+  $result = find_by_sql($sql);
+  return $result ? $result : []; // Devuelve un array vacío si no hay ítems
 }
 
 function find_by_field($table, $field, $value) {
@@ -378,4 +380,5 @@ function find_by_field($table, $field, $value) {
   $result = find_by_sql($sql);
   return $result ? $result[0] : false; // Devuelve el primer elemento del array o false si no hay resultados
 }
+
 ?>
