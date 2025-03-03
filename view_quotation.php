@@ -25,7 +25,7 @@ if (!$quotation) {
             </div>
             <div class="panel-body">
                 <!-- Botón para imprimir -->
-                <button onclick="window.print()" class="btn btn-primary">Imprimir Cotización</button>
+                <a href="generate_pdf.php?id=<?php echo $quotation['id']; ?>" class="btn btn-primary">Descargar PDF</a>
 
                 <!-- Contenido de la cotización -->
                 <div id="quotation-print" style="width: 100%; max-width: 100%; margin: 0 auto;">
@@ -88,7 +88,7 @@ if (!$quotation) {
     /* Estilos generales para la impresión */
     @media print {
     @page {
-        margin: 0.25in;
+        margin: 0.15in;
     }
 
     body {

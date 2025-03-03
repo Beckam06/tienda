@@ -14,12 +14,17 @@ function find_all($table) {
 /*--------------------------------------------------------------*/
 /* Function for Perform queries
 /*--------------------------------------------------------------*/
-function find_by_sql($sql)
-{
+function find_by_sql($sql) {
   global $db;
+
   $result = $db->query($sql);
-  $result_set = $db->while_loop($result);
- return $result_set;
+  
+  if ($result === false) {
+    return []; // Devuelve un array vacío si hay un error en la consulta
+  }
+
+  $result_set = while_loop($result); // Usa la función while_loop para obtener los resultados
+  return $result_set ? $result_set : []; // Devuelve un array vacío si no hay resultados
 }
 /*--------------------------------------------------------------*/
 /*  Function for Find data from table by id
@@ -359,8 +364,9 @@ function search_product_table($search) {
   $sql .= " FROM products p";
   $sql .= " LEFT JOIN categories c ON c.id = p.categorie_id";
   $sql .= " LEFT JOIN media m ON m.id = p.media_id";
-  $sql .= " WHERE p.name LIKE '%{$search}%'";
+  $sql .= " WHERE p.name LIKE '%{$search}%' OR p.codigo LIKE '%{$search}%'"; // Buscar por nombre o código
   $sql .= " ORDER BY p.id ASC";
+  
   return find_by_sql($sql);
 }
 
@@ -380,5 +386,22 @@ function find_by_field($table, $field, $value) {
   $result = find_by_sql($sql);
   return $result ? $result[0] : false; // Devuelve el primer elemento del array o false si no hay resultados
 }
+function while_loop($result) {
+  global $db;
+  $data = [];
+  while ($row = $db->fetch_assoc($result)) {
+    $data[] = $row;
+  }
+  return $data;
+}
+
+
+
+
+
+
+
+
+
 
 ?>

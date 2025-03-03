@@ -12,8 +12,8 @@ if(empty($errors)){
      $session->login($user_id);
     //Update Sign in time
      updateLastLogIn($user_id);
-     $session->msg("s", "Bienvenido a OSWA-INV.");
-     redirect('home.php',false);
+     $session->msg("s", "Bienvenido.");
+     redirect('admin.php',false);
 
   } else {
     $session->msg("d", "Nombre de usuario y/o contraseña incorrecto.");
